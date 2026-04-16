@@ -1,0 +1,14 @@
+dependencies:
+  idf: ">=5.4"
+  usb_host_cdc_acm:
+    version: "*"
+  usb_host_vcp:
+    version: "^1"
+  usb_host_ch34x_vcp:
+    version: "^2"
+  usb_host_cp210x_vcp:
+    version: "^2"
+  usb_host_ftdi_vcp:
+    version: "^2"
+  mdns:
+    version: "*"
