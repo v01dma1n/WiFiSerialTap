@@ -1,7 +1,6 @@
 photos/
-src.ino/
-
-.vscode/
-*.code-workspace    
 build/
 managed_components/
+.gitignore
+.vscode/
+*.code-workspace
