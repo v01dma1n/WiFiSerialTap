@@ -57,14 +57,8 @@ static void event_handler(void *arg, esp_event_base_t base,
             esp_wifi_connect();
             break;
         case WIFI_EVENT_STA_DISCONNECTED:
-            if (s_retry_count < MAX_RETRY) {
-                esp_wifi_connect();
-                s_retry_count++;
-                ESP_LOGI(TAG, "retrying connection (%d/%d)",
-                         s_retry_count, MAX_RETRY);
-            } else {
-                xEventGroupSetBits(g_wifi_event_group, WST_WIFI_FAIL_BIT);
-            }
+            ESP_LOGW(TAG, "WiFi disconnected, reconnecting...");
+            esp_wifi_connect();
             break;
         case WIFI_EVENT_AP_STACONNECTED: {
             wifi_event_ap_staconnected_t *ev =
