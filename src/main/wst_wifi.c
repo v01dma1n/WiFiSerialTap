@@ -166,6 +166,7 @@ esp_err_t wst_wifi_init(void)
         wifi_prov_mgr_deinit();
         ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
         ESP_ERROR_CHECK(esp_wifi_start());
+        ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
 
         xEventGroupWaitBits(g_wifi_event_group,
                             WST_WIFI_CONNECTED_BIT | WST_WIFI_FAIL_BIT,
