@@ -59,11 +59,14 @@ void app_main(void)
     // 2. Telnet server
     ESP_ERROR_CHECK(wst_telnet_init(WST_TELNET_PORT));
 
-    // 3. USB host — install drivers, start VCP connection loop
+    // 3. OTA update server
+    ESP_ERROR_CHECK(wst_ota_init());
+
+    // 4. USB host — install drivers, start VCP connection loop
     wst_usb_set_rx_callback(on_usb_rx);
     ESP_ERROR_CHECK(wst_usb_init());
 
-    // 4. Reverse channel (Telnet → USB)
+    // 5. Reverse channel (Telnet → USB)
     xTaskCreate(reverse_channel_task, "reverse_ch", 4096, NULL, 2, NULL);
 
     ESP_LOGI(TAG, "all systems running");

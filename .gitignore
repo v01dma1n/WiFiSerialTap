@@ -1,6 +1,11 @@
 photos/
 build/
 managed_components/
+dependencies.lock
+sdkconfig
+sdkconfig.old
 .gitignore
 .vscode/
 *.code-workspace
+
+ 

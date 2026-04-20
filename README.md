@@ -46,16 +46,28 @@ The UART port on the S3 is used for flashing and the debug console.
 
 Requires ESP-IDF v5.4+ and ~5 GB free disk space.
 
+The OTA authentication key is passed as an environment variable — it
+never exists in any file in the repository:
+
 ```bash
 . ~/esp/esp-idf/export.sh
 cd ~/projects/OpenSource/WiFiSerialTap
 idf.py set-target esp32s3
-idf.py build
-idf.py -p /dev/ttyACM0 flash monitor
+WST_OTA_KEY=your-secret-key idf.py build
+idf.py -p /dev/ttyACM0 erase-flash flash monitor
 ```
 
 If `flash` fails with a connection error, force download mode: hold
 **BOOT**, tap **RST**, release **BOOT**, then retry flashing.
+
+For convenience, export the key for the session:
+
+```bash
+export WST_OTA_KEY=your-secret-key
+idf.py build
+```
+
+The build will fail with a clear error if `WST_OTA_KEY` is not set.
 
 ### Dependencies
 
@@ -68,6 +80,17 @@ Pulled automatically by the component manager on first build into
 - `espressif/usb_host_ch34x_vcp`
 - `espressif/usb_host_ftdi_vcp`
 - `espressif/mdns`
+
+### Partition Layout (16 MB flash)
+
+| Partition | Type   | Size  | Purpose                         |
+|-----------|--------|-------|---------------------------------|
+| nvs       | data   | 24 KB | WiFi credentials, settings      |
+| otadata   | data   | 8 KB  | OTA boot slot tracking          |
+| phy_init  | data   | 4 KB  | RF calibration                  |
+| ota_0     | app    | 3 MB  | Firmware slot A                 |
+| ota_1     | app    | 3 MB  | Firmware slot B                 |
+| storage   | data   | ~10 MB| Reserved for future use         |
 
 ## First Boot — WiFi Provisioning
 
@@ -128,9 +151,37 @@ nc <device-ip> 23
 Target's serial output streams in real-time. Data you type into the
 Telnet session is forwarded back to the target (reverse channel).
 
+## OTA Firmware Update
+
+The device runs an HTTP server on port 8080 for over-the-air updates.
+Updates are authenticated with the `X-OTA-Key` header.
+
+### Check current version
+
+```bash
+curl http://<device-ip>:8080/status
+```
+
+Returns JSON with app name, version, active partition, and IDF version.
+
+### Push new firmware
+
+```bash
+WST_OTA_KEY=your-secret-key idf.py build
+curl -H "X-OTA-Key: your-secret-key" \
+     http://<device-ip>:8080/ota \
+     --data-binary @build/wifi_serial_tap.bin
+```
+
+The device validates the image, writes it to the inactive OTA slot,
+switches the boot partition, and reboots automatically. WiFi credentials
+are preserved — no re-provisioning needed.
+
+A request without the correct `X-OTA-Key` header returns `403 Forbidden`.
+
 ## Re-provisioning
 
-To clear stored credentials and enter provisioning mode again:
+To clear stored WiFi credentials and enter provisioning mode again:
 
 ```bash
 idf.py -p /dev/ttyACM0 erase-flash flash
@@ -141,6 +192,8 @@ idf.py -p /dev/ttyACM0 erase-flash flash
 - **Serial baud rate:** defaults to 115200/8N1. To change, edit the
   `line_coding` struct in `src/main/wst_usb.cpp`.
 - **Telnet port:** default is 23. Change `WST_TELNET_PORT` in
+  `src/main/wst_main.h`.
+- **OTA port:** default is 8080. Change `WST_OTA_PORT` in
   `src/main/wst_main.h`.
 - **SoftAP credentials:** change `WST_DEVICE_NAME` and
   `WST_PROV_AP_PASSWORD` in `src/main/wst_main.h`.
@@ -153,6 +206,7 @@ src/main/
 ├── wst_wifi.c          SoftAP provisioning + STA connect
 ├── wst_usb.cpp         USB host CDC/VCP driver (C++)
 ├── wst_telnet.c        Single-client TCP server
+├── wst_ota.c           HTTP OTA push endpoint
 └── wst_main.h          Shared types and declarations
 ```
 
@@ -163,5 +217,8 @@ src/main/
   data to a callback.
 - **Telnet** — raw POSIX socket, non-blocking, single client. New
   connections replace the previous one.
+- **OTA** — HTTP POST endpoint on port 8080, authenticated with a
+  shared key injected at build time via environment variable. Writes
+  to the inactive OTA partition and reboots.
 - **Data flow** — USB RX → console mirror + telnet send. Telnet RX →
   USB TX (reverse channel).

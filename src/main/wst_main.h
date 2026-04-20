@@ -14,8 +14,12 @@
 // ---------------------------------------------------------------------------
 #define WST_DEVICE_NAME       "WiFiSerialTap"
 #define WST_TELNET_PORT       23
+#define WST_OTA_PORT          8080
 #define WST_USB_RX_BUF_SIZE   512
 #define WST_PROV_AP_PASSWORD  "wstconfig"
+
+// WST_OTA_KEY is injected at compile time by CMake from the
+// WST_OTA_KEY environment variable.  See src/main/CMakeLists.txt.
 
 // Event group bits
 #define WST_WIFI_CONNECTED_BIT  BIT0
@@ -32,7 +36,7 @@ extern EventGroupHandle_t g_wifi_event_group;
 esp_err_t wst_wifi_init(void);
 
 // ---------------------------------------------------------------------------
-// USB Host CDC subsystem (wst_usb.c)
+// USB Host CDC subsystem (wst_usb.cpp)
 // ---------------------------------------------------------------------------
 esp_err_t wst_usb_init(void);
 
@@ -50,5 +54,10 @@ esp_err_t wst_telnet_init(uint16_t port);
 void wst_telnet_send(const uint8_t *data, size_t len);
 size_t wst_telnet_recv(uint8_t *buf, size_t max_len);
 bool wst_telnet_has_client(void);
+
+// ---------------------------------------------------------------------------
+// OTA update server (wst_ota.c)
+// ---------------------------------------------------------------------------
+esp_err_t wst_ota_init(void);
 
 #endif // WST_MAIN_H
