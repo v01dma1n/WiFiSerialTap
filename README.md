@@ -151,6 +151,26 @@ nc <device-ip> 23
 Target's serial output streams in real-time. Data you type into the
 Telnet session is forwarded back to the target (reverse channel).
 
+### Timestamped Logging
+
+To add timestamps to every line and save to a log file:
+
+```bash
+sudo apt install moreutils   # one-time install for the 'ts' command
+nc <device-ip> 23 | ts '[%Y-%m-%d %H:%M:%S]' | tee ~/log/wst_session.log
+```
+
+This gives timestamped output on screen and saves it to
+`~/log/wst_session.log` simultaneously. Example output:
+
+```
+[2026-04-15 22:41:03] WiFi connected
+[2026-04-15 22:41:03] IP address: 192.168.1.207
+[2026-04-15 22:41:03] Starting Listener.
+```
+
+For a shorter timestamp format, use `ts '[%H:%M:%S]'` instead.
+
 ## OTA Firmware Update
 
 The device runs an HTTP server on port 8080 for over-the-air updates.
