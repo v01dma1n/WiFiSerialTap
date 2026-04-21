@@ -8,12 +8,12 @@ enumerates the USB-UART bridge, reads the serial stream as a USB host,
 and relays it over WiFi in real time.
 
 ```
-┌─────────────┐       ┌──────────────────┐       ┌─────────────┐
-│ Power       │  5V   │   WiFiSerialTap  │  USB  │ Target DUT  │
+┌─────────────┐       ┌──────────────────┐       ┌──────────────┐
+│ Power       │  5V   │   WiFiSerialTap  │  USB  │ Target DUT   │
 │ (PC/charger)│──────▶│   ESP32-S3       │◀─────▶│ (any board   │
 │             │       │   USB Host +     │       │  with CP210x,│
 │             │       │   WiFi Relay     │       │  CH340, FTDI)│
-└─────────────┘       └────────┬─────────┘       └─────────────┘
+└─────────────┘       └────────┬─────────┘       └──────────────┘
                                │ WiFi
                                ▼
                        ┌────────────────┐
@@ -67,6 +67,20 @@ The S3's USB OTG port does not supply VBUS by default — the target must
 be powered through the S3's 5V rail or an external source.
 
 The UART port on the S3 is used for flashing and the debug console.
+
+### Enclosure
+
+A 3D-printable enclosure is available on OnShape:
+
+[WiFiSerialTap Enclosure](https://cad.onshape.com/documents/1a81ed11f778a8ae66ed4351/w/8b706b69c2fdf03546665b0f/e/0b6b5d467c1a0489c680da45)
+
+<img src="photos/10.%20WiFiSerialTap%20-%203D%20Printed%20Case.jpg" width="400"><br><sub>3D Printed Case</sub>
+
+<img src="photos/20.%20WiFiSerialTap%20-%20Soldering%20USB%20wires%20to%20connectors.jpg" width="400"><br><sub>Soldering USB wires to connectors</sub>
+
+<img src="photos/30.%20WiFiSerialTap%20-%20USB%20Ports%20Installed.jpg" width="400"><br><sub>USB Ports Installed</sub>
+
+<img src="photos/40.%20WiFiSerialTap%20-%20Ready%20to%20close%20the%20enclosure.jpg" width="400"><br><sub>Ready to close the enclosure</sub>
 
 ## Build
 
@@ -153,6 +167,8 @@ Smart Connect in the router admin panel.
 
 ## Usage
 
+<img src="photos/50.%20WiFiSerialTap%20-%20Connected%20to%20DUT.jpg" width="400"><br><sub>Connected to DUT</sub>
+
 Power the target and plug its USB cable into the S3's USB OTG port. The
 console should show:
 
@@ -194,6 +210,8 @@ This gives timestamped output on screen and saves it to
 [2026-04-15 22:41:03] IP address: 192.168.1.207
 [2026-04-15 22:41:03] Starting Listener.
 ```
+
+<img src="photos/60.%20WiFiSerialTap%20-%20Telnet%20Output.png" width="400"><br><sub>Telnet Output</sub>
 
 A convenience script `wst_log.sh` is included:
 
