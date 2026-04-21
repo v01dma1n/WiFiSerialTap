@@ -7,4 +7,4 @@ sdkconfig.old
 .vscode/
 *.code-workspace
 
- 
+ .vscode/
